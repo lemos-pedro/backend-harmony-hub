@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TorresRouteImport } from './routes/torres'
+import { Route as TorresTorreIdRouteImport } from './routes/torres.$torreId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,39 @@ const TorresRoute = TorresRouteImport.update({
   path: '/torres',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TorresTorreIdRoute = TorresTorreIdRouteImport.update({
+  id: '/$torreId',
+  path: '/$torreId',
+  getParentRoute: () => TorresRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/torres': typeof TorresRoute
+  '/torres': typeof TorresRouteWithChildren
+  '/torres/$torreId': typeof TorresTorreIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/torres': typeof TorresRoute
+  '/torres': typeof TorresRouteWithChildren
+  '/torres/$torreId': typeof TorresTorreIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/torres': typeof TorresRoute
+  '/torres': typeof TorresRouteWithChildren
+  '/torres/$torreId': typeof TorresTorreIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/torres'
+  fullPaths: '/' | '/torres' | '/torres/$torreId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/torres'
-  id: '__root__' | '/' | '/torres'
+  to: '/' | '/torres' | '/torres/$torreId'
+  id: '__root__' | '/' | '/torres' | '/torres/$torreId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  TorresRoute: typeof TorresRoute
+  TorresRoute: typeof TorresRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +74,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TorresRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/torres/$torreId': {
+      id: '/torres/$torreId'
+      path: '/$torreId'
+      fullPath: '/torres/$torreId'
+      preLoaderRoute: typeof TorresTorreIdRouteImport
+      parentRoute: typeof TorresRoute
+    }
   }
 }
 
+interface TorresRouteChildren {
+  TorresTorreIdRoute: typeof TorresTorreIdRoute
+}
+
+const TorresRouteChildren: TorresRouteChildren = {
+  TorresTorreIdRoute: TorresTorreIdRoute,
+}
+
+const TorresRouteWithChildren =
+  TorresRoute._addFileChildren(TorresRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  TorresRoute: TorresRoute,
+  TorresRoute: TorresRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
