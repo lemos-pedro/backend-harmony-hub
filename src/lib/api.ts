@@ -23,7 +23,7 @@ export interface ApiRegion { region_id: string; name: string; latitude?: number;
 export interface ApiGeneratorReading { TowerID?: string; tower_id?: string; FuelLiters?: number; fuel_liters?: number; FuelPercent?: number; fuel_percent?: number; BatteryVoltageV?: number; battery_voltage_v?: number; RunHoursTotal?: number; run_hours_total?: number; RPM?: number; rpm?: number; FrequencyHz?: number; frequency_hz?: number; EngineTempC?: number; engine_temp_c?: number; CollectedAt?: string; collected_at?: string }
 export interface Paginated<T> { data: T[]; meta: { limit: number; offset: number; total: number } }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "https://careless-deplored-lure.ngrok-free.dev").replace(/\/$/, "");
+const API_BASE_URL = (import.meta.env["VITE_API_BASE_URL"] || "https://careless-deplored-lure.ngrok-free.dev").replace(/\/$/, "");
 const tokenKey = "antosc.api.token";
 
 async function request<T>(path: string, query?: Record<string, string | number | undefined>): Promise<T> {

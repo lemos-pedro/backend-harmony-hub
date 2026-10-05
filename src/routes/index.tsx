@@ -1,24 +1,23 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { ArrowRight, BarChart3, MapPin, RadioTower } from "lucide-react";
+import { FleetKpis } from "@/components/FleetKpis";
+import { TowerTable } from "@/components/TowerTable";
+import { ApiErrorState, EmptyState } from "@/components/DataStates";
+import { Button } from "@/components/ui/button";
+import { operatorsQuery, regionsQuery, towersQuery } from "@/lib/queries";
+import { toTowerView } from "@/lib/operations";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  loader: async ({ context }) => { await Promise.all([context.queryClient.ensureQueryData(towersQuery), context.queryClient.ensureQueryData(regionsQuery), context.queryClient.ensureQueryData(operatorsQuery)]); },
+  head: () => ({ meta: [{ title: "Visão geral — ANTOSC" }, { name: "description", content: "Estado operacional e qualidade da recolha dos sites ANTOSC." }, { property: "og:title", content: "Visão geral — ANTOSC" }, { property: "og:description", content: "Estado operacional e qualidade da recolha dos sites ANTOSC." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  component: Overview, errorComponent: ({ error, reset }) => <ApiErrorState error={error} retry={reset}/>, notFoundComponent: () => <EmptyState title="Dados não encontrados" text="A visão geral não recebeu sites da API."/>,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+function Overview() {
+  const { data: towerPage } = useSuspenseQuery(towersQuery); const { data: regionPage } = useSuspenseQuery(regionsQuery); const { data: operatorPage } = useSuspenseQuery(operatorsQuery);
+  const towers = towerPage.data.map((tower) => toTowerView(tower, regionPage.data, operatorPage.data));
+  const attention = towers.filter((tower) => tower.observedState === "critical" || tower.observedState === "unknown").sort((a, b) => Number(Boolean(b.last_collection_error)) - Number(Boolean(a.last_collection_error))).slice(0, 7);
+  const regionStats = [...new Set(towers.map((t) => t.regionName))].map((name) => ({ name, total: towers.filter((t) => t.regionName === name).length, issues: towers.filter((t) => t.regionName === name && t.observedState !== "healthy").length })).sort((a, b) => b.total - a.total).slice(0, 6);
+  const maxRegion = Math.max(...regionStats.map((r) => r.total), 1);
+  return <div className="space-y-6"><section className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-semibold uppercase text-primary">Centro de operações</p><h2 className="mt-1 text-2xl font-bold">O que precisa de atenção agora</h2><p className="mt-1 text-sm text-muted-foreground">Estado observado a partir da recolha, não apenas do estado declarado.</p></div><Button asChild variant="outline"><Link to="/torres" search={{ q: "", state: "all", vendor: "all", region: "all", page: 1 }}>Ver inventário <ArrowRight/></Link></Button></section><FleetKpis towers={towers}/><section className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(300px,.7fr)]"><div className="border border-border bg-card"><div className="flex items-center justify-between border-b border-border px-4 py-3"><div><h3 className="text-sm font-semibold">Fila de intervenção</h3><p className="text-[11px] text-muted-foreground">Sites com falha de recolha ou sem histórico</p></div><span className="font-mono text-xs text-danger">{attention.length} prioritários</span></div>{attention.length ? <TowerTable towers={attention} compact/> : <EmptyState title="Sem sites prioritários" text="Nenhum problema foi identificado nos dados atuais."/>}</div><div className="border border-border bg-card"><div className="border-b border-border px-4 py-3"><h3 className="flex items-center gap-2 text-sm font-semibold"><MapPin className="h-4 w-4 text-primary"/>Cobertura por região</h3><p className="text-[11px] text-muted-foreground">Volume e incidências observadas</p></div><div className="space-y-4 p-4">{regionStats.map((region) => <div key={region.name}><div className="mb-1.5 flex items-center justify-between text-xs"><span className="font-medium">{region.name}</span><span className="font-mono text-muted-foreground">{region.total} sites</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${(region.total / maxRegion) * 100}%` }}/></div>{region.issues > 0 && <p className="mt-1 text-[10px] text-warning">{region.issues} requerem atenção</p>}</div>)}</div><div className="grid grid-cols-2 gap-px border-t border-border bg-border"><Link to="/mapa" className="flex items-center gap-2 bg-card p-4 text-xs font-semibold hover:bg-muted"><RadioTower className="h-4 w-4 text-primary"/>Abrir mapa</Link><Link to="/relatorios" className="flex items-center gap-2 bg-card p-4 text-xs font-semibold hover:bg-muted"><BarChart3 className="h-4 w-4 text-primary"/>Exportar dados</Link></div></div></section></div>;
 }
