@@ -10,12 +10,36 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AlarmesRouteImport } from './routes/alarmes'
+import { Route as MapaRouteImport } from './routes/mapa'
+import { Route as OperadoresRouteImport } from './routes/operadores'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as TorresRouteImport } from './routes/torres'
 import { Route as TorresTorreIdRouteImport } from './routes/torres.$torreId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlarmesRoute = AlarmesRouteImport.update({
+  id: '/alarmes',
+  path: '/alarmes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapaRoute = MapaRouteImport.update({
+  id: '/mapa',
+  path: '/mapa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OperadoresRoute = OperadoresRouteImport.update({
+  id: '/operadores',
+  path: '/operadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TorresRoute = TorresRouteImport.update({
@@ -31,30 +55,68 @@ const TorresTorreIdRoute = TorresTorreIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/alarmes': typeof AlarmesRoute
+  '/mapa': typeof MapaRoute
+  '/operadores': typeof OperadoresRoute
+  '/relatorios': typeof RelatoriosRoute
   '/torres': typeof TorresRouteWithChildren
   '/torres/$torreId': typeof TorresTorreIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alarmes': typeof AlarmesRoute
+  '/mapa': typeof MapaRoute
+  '/operadores': typeof OperadoresRoute
+  '/relatorios': typeof RelatoriosRoute
   '/torres': typeof TorresRouteWithChildren
   '/torres/$torreId': typeof TorresTorreIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/alarmes': typeof AlarmesRoute
+  '/mapa': typeof MapaRoute
+  '/operadores': typeof OperadoresRoute
+  '/relatorios': typeof RelatoriosRoute
   '/torres': typeof TorresRouteWithChildren
   '/torres/$torreId': typeof TorresTorreIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/torres' | '/torres/$torreId'
+  fullPaths:
+    | '/'
+    | '/alarmes'
+    | '/mapa'
+    | '/operadores'
+    | '/relatorios'
+    | '/torres'
+    | '/torres/$torreId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/torres' | '/torres/$torreId'
-  id: '__root__' | '/' | '/torres' | '/torres/$torreId'
+  to:
+    | '/'
+    | '/alarmes'
+    | '/mapa'
+    | '/operadores'
+    | '/relatorios'
+    | '/torres'
+    | '/torres/$torreId'
+  id:
+    | '__root__'
+    | '/'
+    | '/alarmes'
+    | '/mapa'
+    | '/operadores'
+    | '/relatorios'
+    | '/torres'
+    | '/torres/$torreId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlarmesRoute: typeof AlarmesRoute
+  MapaRoute: typeof MapaRoute
+  OperadoresRoute: typeof OperadoresRoute
+  RelatoriosRoute: typeof RelatoriosRoute
   TorresRoute: typeof TorresRouteWithChildren
 }
 
@@ -65,6 +127,34 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alarmes': {
+      id: '/alarmes'
+      path: '/alarmes'
+      fullPath: '/alarmes'
+      preLoaderRoute: typeof AlarmesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mapa': {
+      id: '/mapa'
+      path: '/mapa'
+      fullPath: '/mapa'
+      preLoaderRoute: typeof MapaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/operadores': {
+      id: '/operadores'
+      path: '/operadores'
+      fullPath: '/operadores'
+      preLoaderRoute: typeof OperadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/torres': {
@@ -97,6 +187,10 @@ const TorresRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlarmesRoute: AlarmesRoute,
+  MapaRoute: MapaRoute,
+  OperadoresRoute: OperadoresRoute,
+  RelatoriosRoute: RelatoriosRoute,
   TorresRoute: TorresRouteWithChildren,
 }
 export const routeTree = rootRouteImport
